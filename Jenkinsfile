@@ -13,6 +13,7 @@ pipeline {
             steps {
                 dir('restaurant-service') {
                     bat '''
+                        if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
                     '''
@@ -24,6 +25,7 @@ pipeline {
             steps {
                 dir('menu-service') {
                     bat '''
+                        if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
                     '''
@@ -35,6 +37,7 @@ pipeline {
             steps {
                 dir('customer-service') {
                     bat '''
+                        if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
                     '''
@@ -46,6 +49,7 @@ pipeline {
             steps {
                 dir('order-service') {
                     bat '''
+                        if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
                     '''
