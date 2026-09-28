@@ -1,0 +1,50 @@
+services:
+
+  restaurant-service:
+    build: ./restaurant-service
+    container_name: restaurant-service
+    ports:
+      - "8001:8001"
+    volumes:
+      - restaurant-data:/app/data
+
+  menu-service:
+    build: ./menu-service
+    container_name: menu-service
+    ports:
+      - "8002:8002"
+    environment:
+      RESTAURANT_SERVICE_URL: http://restaurant-service:8001
+    volumes:
+      - menu-data:/app/data
+    depends_on:
+      - restaurant-service
+
+  customer-service:
+    build: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8003:8003"
+    volumes:
+      - customer-data:/app/data
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8004:8004"
+    environment:
+      CUSTOMER_SERVICE_URL: http://customer-service:8003
+      MENU_SERVICE_URL: http://menu-service:8002
+    volumes:
+      - order-data:/app/data
+    depends_on:
+      - customer-service
+      - menu-service
+
+
+volumes:
+  restaurant-data:
+  menu-data:
+  customer-data:
+  order-data:
