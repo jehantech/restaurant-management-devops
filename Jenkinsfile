@@ -9,6 +9,15 @@ pipeline {
             }
         }
 
+        stage('Environment Check') {
+            steps {
+                bat 'git --version'
+                bat 'python --version'
+                bat 'docker --version'
+                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" version'
+            }
+        }
+
         stage('Test Restaurant Service') {
             steps {
                 dir('restaurant-service') {
@@ -56,15 +65,33 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Images') {
+            steps {
+                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -f docker-compose.yml build'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p restaurant-management -f docker-compose.yml up -d'
+            }
+        }
+
+        stage('Check Services') {
+            steps {
+                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p restaurant-management -f docker-compose.yml ps'
+            }
+        }
     }
 
     post {
         success {
-            echo 'All microservice tests passed successfully!'
+            echo 'CI/CD pipeline completed successfully!'
         }
 
         failure {
-            echo 'One or more stages failed.'
+            echo 'Pipeline failed. Check the stage logs.'
         }
     }
 }
