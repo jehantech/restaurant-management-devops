@@ -9,7 +9,7 @@ def test_create_customer():
         "/customers/",
         json={
             "name": "Test Customer",
-            "email": "testcustomer@example.com",
+            "email": "jenkins-test-customer-001@example.com",
             "phone": "9999999999"
         }
     )
@@ -19,7 +19,7 @@ def test_create_customer():
     data = response.json()
 
     assert data["name"] == "Test Customer"
-    assert data["email"] == "testcustomer@example.com"
+    assert data["email"] == "jenkins-test-customer-001@example.com"
     assert data["phone"] == "9999999999"
 
 
