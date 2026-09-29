@@ -110,6 +110,13 @@ pipeline {
             }
         }
 
+        stage('Kubernetes Check') {
+            steps {
+                bat 'kubectl config current-context'
+                bat 'kubectl get nodes'
+            }
+        }
+
         stage('Push Images to Docker Hub') {
              steps {
                  bat '''
