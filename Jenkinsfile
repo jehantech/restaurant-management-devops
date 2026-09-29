@@ -81,6 +81,27 @@ pipeline {
             }
         }
 
+        stage('Docker Auth Diagnostics') {
+            steps {
+                bat '''
+                    echo Jenkins user:
+                    whoami
+
+                    echo.
+                    echo Docker context:
+                    docker context show
+
+                    echo.
+                    echo Docker version:
+                    docker version
+
+                    echo.
+                    echo Token length:
+                    powershell -NoProfile -Command "$env:DOCKERHUB_TOKEN.Length"
+                '''
+            }
+        }
+
         stage('Docker Hub Login') {
             steps {
                 bat '''
