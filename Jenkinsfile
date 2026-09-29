@@ -112,10 +112,13 @@ pipeline {
 
         stage('Kubernetes Check') {
             steps {
-                bat 'kubectl config current-context'
-                bat 'kubectl get nodes'
-            }
-        }
+                bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+            kubectl config current-context
+            kubectl get nodes
+                '''
+    }
+}
 
         stage('Push Images to Docker Hub') {
              steps {
