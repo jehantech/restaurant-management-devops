@@ -105,7 +105,7 @@ pipeline {
         stage('Docker Hub Login') {
             steps {
                 bat '''
-                    echo %DOCKERHUB_TOKEN% | docker login -u %DOCKERHUB_USERNAME% --password-stdin
+                    powershell -NoProfile -NonInteractive -Command "$env:DOCKERHUB_TOKEN | docker login -u $env:DOCKERHUB_USERNAME --password-stdin"
                 '''
             }
         }
