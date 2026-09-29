@@ -81,6 +81,20 @@ pipeline {
             }
         }
 
+        stage('Trivy Security Scan') {
+    steps {
+        bat '''
+            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-restaurant-service:latest
+
+            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-menu-service:latest
+
+            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-customer-service:latest
+
+            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-order-service:latest
+        '''
+    }
+}
+
         stage('Docker Hub Login') {
             steps {
                 bat '''
