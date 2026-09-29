@@ -81,27 +81,6 @@ pipeline {
             }
         }
 
-        stage('Docker Auth Diagnostics') {
-            steps {
-                bat '''
-                    echo Jenkins user:
-                    whoami
-
-                    echo.
-                    echo Docker context:
-                    docker context show
-
-                    echo.
-                    echo Docker version:
-                    docker version
-
-                    echo.
-                    echo Token length:
-                    powershell -NoProfile -Command "$env:DOCKERHUB_TOKEN.Length"
-                '''
-            }
-        }
-
         stage('Docker Hub Login') {
             steps {
                 bat '''
@@ -110,19 +89,9 @@ pipeline {
             }
         }
 
-        stage('Kubernetes Check') {
+        stage('Push Images to Docker Hub') {
             steps {
                 bat '''
-                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
-            kubectl config current-context
-            kubectl get nodes
-                '''
-    }
-}
-
-        stage('Push Images to Docker Hub') {
-             steps {
-                 bat '''
                     docker tag restaurant-management-ci-restaurant-service:latest %DOCKERHUB_USERNAME%/restaurant-service:latest
                     docker tag restaurant-management-ci-menu-service:latest %DOCKERHUB_USERNAME%/menu-service:latest
                     docker tag restaurant-management-ci-customer-service:latest %DOCKERHUB_USERNAME%/customer-service:latest
@@ -132,19 +101,50 @@ pipeline {
                     docker push %DOCKERHUB_USERNAME%/menu-service:latest
                     docker push %DOCKERHUB_USERNAME%/customer-service:latest
                     docker push %DOCKERHUB_USERNAME%/order-service:latest
-                 '''
+                '''
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
-                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p restaurant-management -f docker-compose.yml up -d'
+                bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+
+                    kubectl apply -f k8s\\restaurant-service.yaml
+                    kubectl apply -f k8s\\menu-service.yaml
+                    kubectl apply -f k8s\\customer-service.yaml
+                    kubectl apply -f k8s\\order-service.yaml
+
+                    kubectl rollout restart deployment restaurant-service
+                    kubectl rollout restart deployment menu-service
+                    kubectl rollout restart deployment customer-service
+                    kubectl rollout restart deployment order-service
+                '''
             }
         }
 
-        stage('Check Services') {
+        stage('Wait for Kubernetes Deployment') {
             steps {
-                bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -p restaurant-management -f docker-compose.yml ps'
+                bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+
+                    kubectl rollout status deployment/restaurant-service --timeout=120s
+                    kubectl rollout status deployment/menu-service --timeout=120s
+                    kubectl rollout status deployment/customer-service --timeout=120s
+                    kubectl rollout status deployment/order-service --timeout=120s
+                '''
+            }
+        }
+
+        stage('Check Kubernetes Services') {
+            steps {
+                bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+
+                    kubectl get deployments
+                    kubectl get services
+                    kubectl get pods -l "app in (restaurant-service,menu-service,customer-service,order-service)"
+                '''
             }
         }
     }
