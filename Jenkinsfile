@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_USERNAME = 'murakan001'
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+    }
+
     stages {
 
         stage('Checkout') {
@@ -73,6 +78,29 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 bat '"C:\\Users\\jehan\\AppData\\Local\\Programs\\DockerDesktop\\resources\\cli-plugins\\docker-compose.exe" -f docker-compose.yml build'
+            }
+        }
+
+        stage('Docker Hub Login') {
+             steps {
+                bat '''
+                    echo %DOCKERHUB_CREDENTIALS_PSW% | docker login -u %DOCKERHUB_CREDENTIALS_USR% --password-stdin                '''
+            }
+        }
+
+        stage('Push Images to Docker Hub') {
+             steps {
+                 bat '''
+                    docker tag restaurant-management-ci-restaurant-service:latest %DOCKERHUB_USERNAME%/restaurant-service:latest
+                    docker tag restaurant-management-ci-menu-service:latest %DOCKERHUB_USERNAME%/menu-service:latest
+                    docker tag restaurant-management-ci-customer-service:latest %DOCKERHUB_USERNAME%/customer-service:latest
+                    docker tag restaurant-management-ci-order-service:latest %DOCKERHUB_USERNAME%/order-service:latest
+
+                    docker push %DOCKERHUB_USERNAME%/restaurant-service:latest
+                    docker push %DOCKERHUB_USERNAME%/menu-service:latest
+                    docker push %DOCKERHUB_USERNAME%/customer-service:latest
+                    docker push %DOCKERHUB_USERNAME%/order-service:latest
+                 '''
             }
         }
 
