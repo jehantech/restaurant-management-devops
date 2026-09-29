@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USERNAME = 'Murakan001'
+        DOCKERHUB_USERNAME = 'murakan001'
         DOCKERHUB_TOKEN = credentials('dockerhub-token')
     }
 
