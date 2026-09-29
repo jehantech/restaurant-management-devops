@@ -2,7 +2,6 @@ services:
 
   restaurant-service:
     build: ./restaurant-service
-    container_name: restaurant-service
     ports:
       - "8001:8001"
     volumes:
@@ -10,7 +9,6 @@ services:
 
   menu-service:
     build: ./menu-service
-    container_name: menu-service
     ports:
       - "8002:8002"
     environment:
@@ -22,7 +20,6 @@ services:
 
   customer-service:
     build: ./customer-service
-    container_name: customer-service
     ports:
       - "8003:8003"
     volumes:
@@ -30,7 +27,6 @@ services:
 
   order-service:
     build: ./order-service
-    container_name: order-service
     ports:
       - "8004:8004"
     environment:
