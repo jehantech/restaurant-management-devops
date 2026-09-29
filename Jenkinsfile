@@ -89,13 +89,13 @@ pipeline {
             docker save restaurant-management-ci-customer-service:latest -o customer-service.tar
             docker save restaurant-management-ci-order-service:latest -o order-service.tar
 
-            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/restaurant-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/restaurant-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
-            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/menu-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/menu-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
-            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/customer-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/customer-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
-            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/order-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/order-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
             del /f /q restaurant-service.tar
             del /f /q menu-service.tar
