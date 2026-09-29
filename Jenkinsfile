@@ -84,17 +84,26 @@ pipeline {
         stage('Trivy Security Scan') {
     steps {
         bat '''
-            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-restaurant-service:latest
+            docker save restaurant-management-ci-restaurant-service:latest -o restaurant-service.tar
+            docker save restaurant-management-ci-menu-service:latest -o menu-service.tar
+            docker save restaurant-management-ci-customer-service:latest -o customer-service.tar
+            docker save restaurant-management-ci-order-service:latest -o order-service.tar
 
-            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-menu-service:latest
+            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/restaurant-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
-            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-customer-service:latest
+            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/menu-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
-            docker run --rm aquasec/trivy:latest image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 restaurant-management-ci-order-service:latest
+            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/customer-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+
+            docker run --rm -v "%CD%:/work" aquasec/trivy:latest image --input /work/order-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+
+            del /f /q restaurant-service.tar
+            del /f /q menu-service.tar
+            del /f /q customer-service.tar
+            del /f /q order-service.tar
         '''
     }
 }
-
         stage('Docker Hub Login') {
             steps {
                 bat '''
