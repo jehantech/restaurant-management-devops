@@ -22,6 +22,7 @@ pipeline {
             steps {
                 dir('restaurant-service') {
                     bat '''
+                        if exist data\\restaurant.db del /f /q data\\restaurant.db
                         if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
@@ -34,6 +35,7 @@ pipeline {
             steps {
                 dir('menu-service') {
                     bat '''
+                        if exist data\\menu.db del /f /q data\\menu.db
                         if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
@@ -46,6 +48,7 @@ pipeline {
             steps {
                 dir('customer-service') {
                     bat '''
+                        if exist data\\customer.db del /f /q data\\customer.db
                         if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
@@ -58,6 +61,7 @@ pipeline {
             steps {
                 dir('order-service') {
                     bat '''
+                        if exist data\\order.db del /f /q data\\order.db
                         if not exist data mkdir data
                         python -m pip install -r requirements.txt
                         python -m pytest -v
