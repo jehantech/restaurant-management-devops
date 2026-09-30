@@ -82,20 +82,41 @@ pipeline {
         }
 
         stage('Trivy Security Scan') {
-    steps {
-        bat '''
+            steps {
+                bat '''
             docker save restaurant-management-ci-restaurant-service:latest -o restaurant-service.tar
             docker save restaurant-management-ci-menu-service:latest -o menu-service.tar
             docker save restaurant-management-ci-customer-service:latest -o customer-service.tar
             docker save restaurant-management-ci-order-service:latest -o order-service.tar
 
+            echo ================================
+            echo TRIVY - RESTAURANT SERVICE
+            echo ================================
             docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/restaurant-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
+            echo ================================
+            echo TRIVY - MENU SERVICE
+            echo ================================
             docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/menu-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
+            echo ================================
+            echo TRIVY - CUSTOMER SERVICE
+            echo ================================
             docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/customer-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
 
+            echo ================================
+            echo TRIVY - ORDER SERVICE
+            echo ================================
             docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/order-service.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 0
+
+            echo ================================
+            echo CRITICAL SECURITY GATE
+            echo ================================
+
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/restaurant-service.tar --scanners vuln --severity CRITICAL --exit-code 1
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/menu-service.tar --scanners vuln --severity CRITICAL --exit-code 1
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/customer-service.tar --scanners vuln --severity CRITICAL --exit-code 1
+            docker run --rm -v trivy-cache:/root/.cache/trivy -v "%CD%:/work" aquasec/trivy:latest image --input /work/order-service.tar --scanners vuln --severity CRITICAL --exit-code 1
 
             del /f /q restaurant-service.tar
             del /f /q menu-service.tar
