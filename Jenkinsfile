@@ -191,6 +191,25 @@ pipeline {
                 '''
             }
         }
+
+                stage('Start Application Port Forwarding') {
+            steps {
+                bat '''
+                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+
+                    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+                    "$env:JENKINS_NODE_COOKIE='dontKillMe'; ^
+                    Get-CimInstance Win32_Process | Where-Object {$_.CommandLine -like '*kubectl port-forward service/restaurant-service*'} | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; ^
+                    Get-CimInstance Win32_Process | Where-Object {$_.CommandLine -like '*kubectl port-forward service/menu-service*'} | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; ^
+                    Get-CimInstance Win32_Process | Where-Object {$_.CommandLine -like '*kubectl port-forward service/customer-service*'} | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; ^
+                    Get-CimInstance Win32_Process | Where-Object {$_.CommandLine -like '*kubectl port-forward service/order-service*'} | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; ^
+                    Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/restaurant-service 8001:8001' -WindowStyle Hidden; ^
+                    Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/menu-service 8002:8002' -WindowStyle Hidden; ^
+                    Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/customer-service 8003:8003' -WindowStyle Hidden; ^
+                    Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/order-service 8004:8004' -WindowStyle Hidden"
+                '''
+            }
+        }
     }
 
     post {
