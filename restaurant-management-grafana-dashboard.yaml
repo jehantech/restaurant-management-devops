@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restaurant-management-grafana-dashboard
+  namespace: default
+  labels:
+    grafana_dashboard: '1'
+data:
+  restaurant-management-dashboard.json: "{\n  \"uid\": \"restaurant-management\",\n\
+    \  \"title\": \"Restaurant Management Monitoring\",\n  \"tags\": [\n    \"restaurant-management\"\
+    ,\n    \"devops\",\n    \"kubernetes\"\n  ],\n  \"timezone\": \"browser\",\n \
+    \ \"schemaVersion\": 39,\n  \"version\": 4,\n  \"refresh\": \"30s\",\n  \"time\"\
+    : {\n    \"from\": \"now-15m\",\n    \"to\": \"now\"\n  },\n  \"panels\": [\n\
+    \    {\n      \"id\": 1,\n      \"type\": \"stat\",\n      \"title\": \"Services\
+    \ UP\",\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"\
+    x\": 0,\n        \"y\": 0\n      },\n      \"datasource\": {\n        \"type\"\
+    : \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum(kube_pod_status_ready{namespace=\\\
+    \"default\\\",condition=\\\"true\\\",pod=~\\\"(restaurant|menu|customer|order)-service-.*\\\
+    \"})\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n\
+    \          \"unit\": \"short\",\n          \"min\": 0,\n          \"max\": 4\n\
+    \        },\n        \"overrides\": []\n      }\n    },\n    {\n      \"id\":\
+    \ 2,\n      \"type\": \"stat\",\n      \"title\": \"Running Pods\",\n      \"\
+    gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"x\": 6,\n      \
+    \  \"y\": 0\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"expr\": \"sum(kube_pod_status_phase{namespace=\\\
+    \"default\\\",phase=\\\"Running\\\"})\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\"\n        },\n    \
+    \    \"overrides\": []\n      }\n    },\n    {\n      \"id\": 3,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Total Restarts\",\n      \"gridPos\": {\n    \
+    \    \"h\": 4,\n        \"w\": 6,\n        \"x\": 12,\n        \"y\": 0\n    \
+    \  },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"\
+    refId\": \"A\",\n          \"expr\": \"sum(kube_pod_container_status_restarts_total{namespace=\\\
+    \"default\\\",pod=~\\\"(restaurant|menu|customer|order)-service-.*\\\"})\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"short\"\n        },\n        \"overrides\": []\n      },\n \
+    \     \"description\": \"Cumulative container restart count for the four application\
+    \ microservices.\"\n    },\n    {\n      \"id\": 4,\n      \"type\": \"stat\"\
+    ,\n      \"title\": \"Minikube CPU Usage\",\n      \"gridPos\": {\n        \"\
+    h\": 4,\n        \"w\": 6,\n        \"x\": 18,\n        \"y\": 0\n      },\n \
+    \     \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\": \"\
+    prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\":\
+    \ \"A\",\n          \"expr\": \"100 * (1 - avg(rate(node_cpu_seconds_total{mode=\\\
+    \"idle\\\"}[5m])))\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"percent\",\n          \"decimals\": 1,\n\
+    \          \"min\": 0,\n          \"max\": 100,\n          \"thresholds\": {\n\
+    \            \"mode\": \"absolute\",\n            \"steps\": [\n             \
+    \ {\n                \"color\": \"green\",\n                \"value\": null\n\
+    \              },\n              {\n                \"color\": \"yellow\",\n \
+    \               \"value\": 70\n              },\n              {\n           \
+    \     \"color\": \"red\",\n                \"value\": 85\n              }\n  \
+    \          ]\n          }\n        },\n        \"overrides\": []\n      }\n  \
+    \  },\n    {\n      \"id\": 5,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Microservices CPU Usage\",\n      \"gridPos\": {\n        \"h\": 8,\n    \
+    \    \"w\": 12,\n        \"x\": 0,\n        \"y\": 4\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"expr\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"default\\\
+    \",pod=~\\\"customer-service-.*\\\"}[5m]))\",\n          \"legendFormat\": \"\
+    Customer Service\"\n        },\n        {\n          \"refId\": \"B\",\n     \
+    \     \"expr\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"default\\\
+    \",pod=~\\\"menu-service-.*\\\"}[5m]))\",\n          \"legendFormat\": \"Menu\
+    \ Service\"\n        },\n        {\n          \"refId\": \"C\",\n          \"\
+    expr\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"default\\\"\
+    ,pod=~\\\"order-service-.*\\\"}[5m]))\",\n          \"legendFormat\": \"Order\
+    \ Service\"\n        },\n        {\n          \"refId\": \"D\",\n          \"\
+    expr\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"default\\\"\
+    ,pod=~\\\"restaurant-service-.*\\\"}[5m]))\",\n          \"legendFormat\": \"\
+    Restaurant Service\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"cores\",\n          \"decimals\": 3\n   \
+    \     },\n        \"overrides\": []\n      }\n    },\n    {\n      \"id\": 6,\n\
+    \      \"type\": \"timeseries\",\n      \"title\": \"Microservices Memory Usage\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\"\
+    : 12,\n        \"y\": 4\n      },\n      \"datasource\": {\n        \"type\":\
+    \ \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum(container_memory_working_set_bytes{namespace=\\\
+    \"default\\\",pod=~\\\"customer-service-.*\\\",container!=\\\"\\\"})\",\n    \
+    \      \"legendFormat\": \"Customer Service\"\n        },\n        {\n       \
+    \   \"refId\": \"B\",\n          \"expr\": \"sum(container_memory_working_set_bytes{namespace=\\\
+    \"default\\\",pod=~\\\"menu-service-.*\\\",container!=\\\"\\\"})\",\n        \
+    \  \"legendFormat\": \"Menu Service\"\n        },\n        {\n          \"refId\"\
+    : \"C\",\n          \"expr\": \"sum(container_memory_working_set_bytes{namespace=\\\
+    \"default\\\",pod=~\\\"order-service-.*\\\",container!=\\\"\\\"})\",\n       \
+    \   \"legendFormat\": \"Order Service\"\n        },\n        {\n          \"refId\"\
+    : \"D\",\n          \"expr\": \"sum(container_memory_working_set_bytes{namespace=\\\
+    \"default\\\",pod=~\\\"restaurant-service-.*\\\",container!=\\\"\\\"})\",\n  \
+    \        \"legendFormat\": \"Restaurant Service\"\n        }\n      ],\n     \
+    \ \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"bytes\",\n\
+    \          \"decimals\": 1,\n          \"thresholds\": {\n            \"mode\"\
+    : \"absolute\",\n            \"steps\": [\n              {\n                \"\
+    color\": \"green\",\n                \"value\": null\n              },\n     \
+    \         {\n                \"color\": \"yellow\",\n                \"value\"\
+    : 67108864\n              },\n              {\n                \"color\": \"red\"\
+    ,\n                \"value\": 134217728\n              }\n            ]\n    \
+    \      }\n        },\n        \"overrides\": []\n      }\n    },\n    {\n    \
+    \  \"id\": 7,\n      \"type\": \"timeseries\",\n      \"title\": \"Microservice\
+    \ Restart Count\",\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n\
+    \        \"x\": 0,\n        \"y\": 12\n      },\n      \"datasource\": {\n   \
+    \     \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n \
+    \     \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"sum(kube_pod_container_status_restarts_total{namespace=\\\"default\\\",pod=~\\\
+    \"customer-service-.*\\\"})\",\n          \"legendFormat\": \"Customer Service\"\
+    \n        },\n        {\n          \"refId\": \"B\",\n          \"expr\": \"sum(kube_pod_container_status_restarts_total{namespace=\\\
+    \"default\\\",pod=~\\\"menu-service-.*\\\"})\",\n          \"legendFormat\": \"\
+    Menu Service\"\n        },\n        {\n          \"refId\": \"C\",\n         \
+    \ \"expr\": \"sum(kube_pod_container_status_restarts_total{namespace=\\\"default\\\
+    \",pod=~\\\"order-service-.*\\\"})\",\n          \"legendFormat\": \"Order Service\"\
+    \n        },\n        {\n          \"refId\": \"D\",\n          \"expr\": \"sum(kube_pod_container_status_restarts_total{namespace=\\\
+    \"default\\\",pod=~\\\"restaurant-service-.*\\\"})\",\n          \"legendFormat\"\
+    : \"Restaurant Service\"\n        }\n      ],\n      \"fieldConfig\": {\n    \
+    \    \"defaults\": {\n          \"unit\": \"short\"\n        },\n        \"overrides\"\
+    : []\n      }\n    },\n    {\n      \"id\": 8,\n      \"type\": \"timeseries\"\
+    ,\n      \"title\": \"Minikube Memory Usage\",\n      \"gridPos\": {\n       \
+    \ \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 12\n     \
+    \ },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)\"\
+    ,\n          \"legendFormat\": \"Minikube Memory\"\n        }\n      ],\n    \
+    \  \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\"\
+    ,\n          \"decimals\": 1,\n          \"min\": 0,\n          \"max\": 100,\n\
+    \          \"thresholds\": {\n            \"mode\": \"absolute\",\n          \
+    \  \"steps\": [\n              {\n                \"color\": \"green\",\n    \
+    \            \"value\": null\n              },\n              {\n            \
+    \    \"color\": \"yellow\",\n                \"value\": 70\n              },\n\
+    \              {\n                \"color\": \"red\",\n                \"value\"\
+    : 85\n              }\n            ]\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"description\": \"Percentage of Minikube node memory currently\
+    \ in use.\"\n    },\n    {\n      \"id\": 9,\n      \"type\": \"table\",\n   \
+    \   \"title\": \"Microservice Status\",\n      \"description\": \"Current readiness\
+    \ of the four Restaurant Management microservices.\",\n      \"gridPos\": {\n\
+    \        \"h\": 7,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 20\n\
+    \      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n      \
+    \  \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"kube_pod_status_ready{namespace=\\\
+    \"default\\\",condition=\\\"true\\\",pod=~\\\"(restaurant|menu|customer|order)-service-.*\\\
+    \"}\",\n          \"format\": \"table\",\n          \"instant\": true\n      \
+    \  }\n      ],\n      \"transformations\": [\n        {\n          \"id\": \"\
+    organize\",\n          \"options\": {\n            \"excludeByName\": {\n    \
+    \          \"Time\": true,\n              \"__name__\": true,\n              \"\
+    container\": true,\n              \"endpoint\": true,\n              \"instance\"\
+    : true,\n              \"job\": true,\n              \"namespace\": true,\n  \
+    \            \"condition\": true,\n              \"service\": true,\n        \
+    \      \"uid\": true,\n              \"created_by_kind\": true,\n            \
+    \  \"created_by_name\": true,\n              \"host_ip\": true,\n            \
+    \  \"pod_ip\": true,\n              \"node\": true\n            },\n         \
+    \   \"renameByName\": {\n              \"pod\": \"Pod\",\n              \"Value\
+    \ #A\": \"Status\"\n            },\n            \"indexByName\": {\n         \
+    \     \"pod\": 0,\n              \"Value #A\": 1\n            }\n          }\n\
+    \        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n    \
+    \      \"mappings\": [\n            {\n              \"type\": \"value\",\n  \
+    \            \"options\": {\n                \"0\": {\n                  \"text\"\
+    : \"Not Ready\",\n                  \"color\": \"red\"\n                },\n \
+    \               \"1\": {\n                  \"text\": \"Ready\",\n           \
+    \       \"color\": \"green\"\n                }\n              }\n           \
+    \ }\n          ],\n          \"thresholds\": {\n            \"mode\": \"absolute\"\
+    ,\n            \"steps\": [\n              {\n                \"color\": \"red\"\
+    ,\n                \"value\": null\n              },\n              {\n      \
+    \          \"color\": \"green\",\n                \"value\": 1\n             \
+    \ }\n            ]\n          }\n        },\n        \"overrides\": []\n     \
+    \ },\n      \"options\": {\n        \"cellHeight\": \"sm\",\n        \"footer\"\
+    : {\n          \"show\": false\n        },\n        \"showHeader\": true\n   \
+    \   }\n    }\n  ]\n}"
