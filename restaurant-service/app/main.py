@@ -8,7 +8,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Restaurant Management System",
     description="Restaurant Management Service for DevOps Project",
-    version="1.0.0"
+    version="1.0.0",
+    root_path="/restaurant"
 )
 
 app.include_router(router)
