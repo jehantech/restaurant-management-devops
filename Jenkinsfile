@@ -192,15 +192,28 @@ pipeline {
             }
         }
 
-        stage('Start Application Port Forwarding') {
-            steps {
-                bat '''
-                    set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+        stage('Start Application and Grafana Port Forwarding') {
+    steps {
+        bat '''
+            set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
+            set JENKINS_NODE_COOKIE=dontKillMe
 
-                    powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/restaurant-service 8001:8001' -WindowStyle Hidden; Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/menu-service 8002:8002' -WindowStyle Hidden; Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/customer-service 8003:8003' -WindowStyle Hidden; Start-Process powershell -ArgumentList '-NoProfile','-Command','kubectl port-forward service/order-service 8004:8004' -WindowStyle Hidden"
-                '''
-            }
-        }
+            start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/restaurant-service 8001:8001"
+            
+            start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/menu-service 8002:8002"
+            
+            start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/customer-service 8003:8003"
+            
+            start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/order-service 8004:8004"
+            
+            start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/monitoring-grafana 3000:80"
+
+            timeout /t 8 /nobreak >nul
+
+            powershell -NoProfile -Command "if ((Test-NetConnection localhost -Port 8001 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8002 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8003 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8004 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 3000 -InformationLevel Quiet)) { Write-Host 'All application and Grafana port-forwards are running.' } else { Write-Host 'Port-forward verification failed.'; exit 1 }"
+        '''
+    }
+}
     }
 
     post {
