@@ -198,6 +198,8 @@ pipeline {
             set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
             set JENKINS_NODE_COOKIE=dontKillMe
 
+            powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=8001,8002,8003,8004,3000; foreach($p in $ports){ Get-NetTCPConnection -LocalPort $p -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }"
+
             start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/restaurant-service 8001:8001"
             
             start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/menu-service 8002:8002"
@@ -208,9 +210,9 @@ pipeline {
             
             start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:KUBECONFIG='C:\\ProgramData\\Jenkins\\.kube\\config'; $env:JENKINS_NODE_COOKIE='dontKillMe'; kubectl port-forward service/monitoring-grafana 3000:80"
 
-            timeout /t 8 /nobreak >nul
+            powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 8"
 
-            powershell -NoProfile -Command "if ((Test-NetConnection localhost -Port 8001 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8002 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8003 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 8004 -InformationLevel Quiet) -and (Test-NetConnection localhost -Port 3000 -InformationLevel Quiet)) { Write-Host 'All application and Grafana port-forwards are running.' } else { Write-Host 'Port-forward verification failed.'; exit 1 }"
+            powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=8001,8002,8003,8004,3000; $ok=$true; foreach($p in $ports){ if(-not (Test-NetConnection localhost -Port $p -InformationLevel Quiet)){ Write-Host ('Port '+$p+' FAILED'); $ok=$false } else { Write-Host ('Port '+$p+' OK') } }; if(-not $ok){ exit 1 }"
         '''
     }
 }
