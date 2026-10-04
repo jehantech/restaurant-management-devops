@@ -18,6 +18,14 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
+          volumeMounts:
+            - name: restaurant-data
+              mountPath: /app/data
+
+      volumes:
+        - name: restaurant-data
+          persistentVolumeClaim:
+            claimName: restaurant-data-pvc
 
 ---
 apiVersion: v1

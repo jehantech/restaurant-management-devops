@@ -19,6 +19,15 @@ spec:
           ports:
             - containerPort: 8003
 
+          volumeMounts:
+            - name: customer-data
+              mountPath: /app/data
+
+      volumes:
+        - name: customer-data
+          persistentVolumeClaim:
+            claimName: customer-data-pvc
+
 ---
 apiVersion: v1
 kind: Service

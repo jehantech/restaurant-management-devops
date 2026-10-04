@@ -18,11 +18,21 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8004
+
           env:
             - name: CUSTOMER_SERVICE_URL
               value: "http://customer-service:8003"
             - name: MENU_SERVICE_URL
               value: "http://menu-service:8002"
+
+          volumeMounts:
+            - name: order-data
+              mountPath: /app/data
+
+      volumes:
+        - name: order-data
+          persistentVolumeClaim:
+            claimName: order-data-pvc
 
 ---
 apiVersion: v1
